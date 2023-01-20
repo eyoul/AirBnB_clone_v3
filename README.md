@@ -157,6 +157,5 @@ No known bugs at this time.
 Eyoul Shimeles - [Github](https://github.com/eyoul)  
 Addisu Dabale - [Github](https://github.com/addisu30)
 
-Second part of Airbnb: Joann Vuong
 ## License
 Public Domain. No copy write protection. 
