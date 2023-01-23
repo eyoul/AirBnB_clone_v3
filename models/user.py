@@ -1,30 +1,47 @@
 #!/usr/bin/python3
-"""Defines the User class."""
-from models.base_model import Base
-from models.base_model import BaseModel
-from sqlalchemy import Column
-from sqlalchemy import String
+""" holds class User"""
+import hashlib
+import models
+from models.base_model import BaseModel, Base
+from os import getenv
+import sqlalchemy
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
 
 class User(BaseModel, Base):
-    """Represents a user for a MySQL database.
+    """Representation of a user """
+    if models.storage_t == 'db':
+        __tablename__ = 'users'
+        email = Column(String(128), nullable=False)
+        password = Column(String(128), nullable=False)
+        first_name = Column(String(128), nullable=True)
+        last_name = Column(String(128), nullable=True)
+        places = relationship(
+            "Place",
+            cascade="all, delete, delete-orphan",
+            backref="user"
+        )
+        reviews = relationship(
+            "Review",
+            cascade="all, delete, delete-orphan",
+            backref="user"
+        )
+    else:
+        email = ""
+        password = ""
+        first_name = ""
+        last_name = ""
 
-    Inherits from SQLAlchemy Base and links to the MySQL table users.
+    def __init__(self, *args, **kwargs):
+        """initializes user"""
+        super().__init__(*args, **kwargs)
 
-    Attributes:
-        __tablename__ (str): The name of the MySQL table to store users.
-        email: (sqlalchemy String): The user's email address.
-        password (sqlalchemy String): The user's password.
-        first_name (sqlalchemy String): The user's first name.
-        last_name (sqlalchemy String): The user's last name.
-        places (sqlalchemy relationship): The User-Place relationship.
-        reviews (sqlalchemy relationship): The User-Review relationship.
-    """
-    __tablename__ = "users"
-    email = Column(String(128), nullable=False)
-    password = Column(String(128), nullable=False)
-    first_name = Column(String(128))
-    last_name = Column(String(128))
-    places = relationship("Place", backref="user", cascade="delete")
-    reviews = relationship("Review", backref="user", cascade="delete")
+    def __setattr__(self, __name: str, __value) -> None:
+        '''Sets an attribute of this class to a given value.'''
+        if __name == 'password':
+            if type(__value) is str:
+                m = hashlib.md5(bytes(__value, 'utf-8'))
+                super().__setattr__(__name, m.hexdigest())
+        else:
+            super().__setattr__(__name, __value)
